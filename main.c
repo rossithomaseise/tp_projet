@@ -1,58 +1,47 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "TicketToRideAPI.h"
-#define POSITION_DEPART 0 /*0: I begin ; =1 the opponent begin*/
-//gcc -c main.c TicketToRideAPI.c clientAPI.c && gcc -o main main.o TicketToRideAPI.o clientAPI.o && ./main
+#include "initialisation.h"
+#include "chemin_court.h"
+//#include "jeu.h"
+//http://li1417-56.members.linode.com:81/index.html
+//gcc -g -c main.c TicketToRideAPI.c clientAPI.c initialisation.c && gcc -o main main.o TicketToRideAPI.o clientAPI.o initialisation.o  && ./main
+//gcc -g -c main.c TicketToRideAPI.c clientAPI.c initialisation.c jeu.c  && gcc -o main main.o TicketToRideAPI.o clientAPI.o initialisation.o jeu.o && ./main
+//gcc -g -c main.c TicketToRideAPI.c clientAPI.c initialisation.c jeu.c chemin_court.c && gcc -o main main.o TicketToRideAPI.o clientAPI.o initialisation.o jeu.o chemin_court.o && ./main
 int main(){
-	/* #### For the function connectToServer #### */
-	/*serverName*/
-	char* serverName = "li1417-56.members.linode.com";
-	/*port number used for the connection*/
-	unsigned int port = 1234;
-	/*Name of the player*/
-	char* name = "Thomas";
-	
-	/* #### For the function waitForT2RGame #### */
-	/*Type of the game we want to play*/
-	//char* gameType = BOT;
-	/*Name of the game*/
-	char *gameName = (char*) malloc(50*sizeof(char));
-	/*the number of cities*/
-	int nbCities ;
-	/*the number of tracks between the cities*/
-	int nbTracks ;
 
+	/*#### définitions des structures #### */
+	/*Structure pour le plateau de jeu : variables constantes 
+	nombre de villes, nombres de chemins, tableau route??*/
+	s_plateau_jeu* plateauJeu = (s_plateau_jeu*)malloc(3*sizeof(int));
+	/*structure pour le joueur */
+	s_joueur* joueur = (s_joueur*)malloc(3*sizeof(int)+60*sizeof(t_color) + sizeof(t_move)+sizeof(t_objective));
+	/*structure pour l'adversaire */
+	s_joueur* adversaire = (s_joueur*)malloc(3*sizeof(int)+sizeof(t_color) +sizeof(t_move)+10*sizeof(t_objective));;
+	/*structure pour les informations de la partie*/
+	s_partie* partie = (s_partie*)malloc(3*sizeof(int)+sizeof(t_color));
+	s_choixCoup* choixCoup = (s_choixCoup*)malloc(10*sizeof(int)+10*sizeof(t_objective));
 	/* #### For the function getMap #### */
 	/*array of (5 x number of tracks) integers*/
-	int* tracks;
-	/*array of 5 t_color giving the 5 face up cards*/
-	t_color faceUp[5];
-	/*array of 4 t_colors with the initial cards in your hand*/
-	t_color cards[4];
-
+	int tracks[390];
 	/* #### Variable pour les fonctions de notre joueur #### */
 	t_color* card = (t_color*)malloc(sizeof(int));
-
+	/*Pioche*/
+	t_color deck[5];
 	/* #### Variables pour la fonction get the opponent move #### */
 	t_move* move = (t_move*)malloc(sizeof(t_typeMove));
+
 	int* replay = (int*)malloc(sizeof(int));
 
 	/*Variable qui contient la valeur de la fonction joué*/
 	t_return_code code;
-	/*Variable de notre position de départ*/
-	int start = POSITION_DEPART;
-
-	/* ######## Connection to the server ######## */
-	connectToServer(serverName,port,name);
-	/* ######## Initialisation for cards, map and the beginner ######## */
-	waitForT2RGame("TRAINING DO_NOTHING timeout=100 start=1 map=USA",gameName,&nbCities,&nbTracks);
-	/*On alloue la taille nécessaire */
-	tracks = malloc(nbTracks*5*sizeof(int));
-	/*######## Initialisation for the map ########
-	Get the map, the decks and initial cards and tell who starts*/
-	getMap(tracks,faceUp,cards);
-	/* ######## Display of the map ######## */
+	/*Variable de notre position de départ, prend la valeur de getMap*/
+	int start;
+	int tab[78];
+	initialisation_jeu(tracks,plateauJeu,joueur,adversaire,partie);
 	printMap();
+	/*Avant de commencer la boucle de jeu, on fait piocher un objectif*/
+	printf("\nAvant de commencer la partie, vous devez piocher un objectif\n");	
 
 	while(1){
 		/*Position de départ*/
@@ -62,30 +51,42 @@ int main(){
 			goto depart;
 		}
 		/*Notre tour*/
-		for(int i=0;i<2;i++){
-				/*on joue, ici on pioche*/
-				code = drawBlindCard(card);
-				/*Conditions si le coup est gagnant, perdant ou si on continue*/
-				if(code==NORMAL_MOVE){
-					printf("Vous avez pioché une carte");
-				}else if(code==WINNING_MOVE){
-					printf("Vous avez gagné");
-					return code;
-				}else{
-					printf("Vous avez perdu");
-					return code;
-				}
-				/*Affichage des coups du joueurs pas à pas*/
-				printMap();
+		//choix_coup(choixCoup);
+		code = mon_bot(partie,choixCoup,joueur,tracks,deck);
+		
+		//code = action_coup(tracks,deck,choixCoup,joueur,partie);
+		affichage_info_joueur(joueur);
+		printMap();
+		/*Conditions si le coup est gagnant, perdant ou si on continue*/
+		if(code==NORMAL_MOVE){
+			//printf("Vous avez joué");
+
+		}else if(code==WINNING_MOVE){
+			printf("Vous avez gagné");
+			return code;
+		}else{
+			affichage_info_joueur(joueur);
+			printf("Vous avez perdu");
+			printf("le code est %d\n",code);
+			return code;
 		}
+		/*Affichage des coups du joueurs pas à pas*/
+		//printMap();
+		
 		depart: /*Etiquette lorsque l'adversaire commence le jeu*/
 		for(int i=0;i<2;i++){
 			code = getMove(move,replay);
+			// printf("l'adversaire a joué objectif %d\n",move->chooseObjectives);
+			// printf("l'adversaire a joué pioche obj%d\n",move->drawObjectives);
+			// printf("l'adversaire a joué pioche deck%d\n",move->drawBlindCard);
+			// printf("l'adversaire a joué pioche%d\n",move->drawCard);
+			// printf("l'adversaire a joué route%d\n",move->claimRoute);
+
 			if(!replay){
 				i++;
 			}
 			if(code==NORMAL_MOVE){
-				printf("l'adversaire a pioché une carte");
+				//printf("l'adversaire a pioché une carte");
 			}else if(code==WINNING_MOVE){
 				printf("Vous avez perdu");
 				return code;
@@ -93,12 +94,14 @@ int main(){
 				printf("Vous avez gagné");
 				return code;
 			}
-			/*Affichage des coups de l'adversaire pas à pas*/
-			printMap();
 		}
+	partie->numero_tour+=1;
 	}
-	/* #### Close the connection to the server #### */
-	closeConnection();
-	free(tracks);
+
+	affichage_info_joueur(joueur);
+	//fin_jeu(tracks);
+	free(card);
+	free(move);
+	free(replay);
 	return 1;
 }
