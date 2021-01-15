@@ -8,8 +8,8 @@
 //gcc -g -c main.c TicketToRideAPI.c clientAPI.c initialisation.c && gcc -o main main.o TicketToRideAPI.o clientAPI.o initialisation.o  && ./main
 //gcc -g -c main.c TicketToRideAPI.c clientAPI.c initialisation.c jeu.c  && gcc -o main main.o TicketToRideAPI.o clientAPI.o initialisation.o jeu.o && ./main
 //gcc -g -c main.c TicketToRideAPI.c clientAPI.c initialisation.c jeu.c chemin_court.c && gcc -o main main.o TicketToRideAPI.o clientAPI.o initialisation.o jeu.o chemin_court.o && ./main
+//https://github.com/thilaire/TicketToRide-Polytech
 int main(){
-
 	/*#### définitions des structures #### */
 	/*Structure pour le plateau de jeu : variables constantes 
 	nombre de villes, nombres de chemins, tableau route??*/
@@ -32,17 +32,15 @@ int main(){
 	t_move* move = (t_move*)malloc(sizeof(t_typeMove));
 
 	int* replay = (int*)malloc(sizeof(int));
-
 	/*Variable qui contient la valeur de la fonction joué*/
 	t_return_code code;
 	/*Variable de notre position de départ, prend la valeur de getMap*/
 	int start;
 	int tab[78];
-	initialisation_jeu(tracks,plateauJeu,joueur,adversaire,partie);
+	initialisation_jeu(tracks,plateauJeu,joueur,adversaire,partie,deck);
 	printMap();
 	/*Avant de commencer la boucle de jeu, on fait piocher un objectif*/
 	printf("\nAvant de commencer la partie, vous devez piocher un objectif\n");	
-
 	while(1){
 		/*Position de départ*/
 		if(start==1){
@@ -71,16 +69,14 @@ int main(){
 			return code;
 		}
 		/*Affichage des coups du joueurs pas à pas*/
-		//printMap();
-		
+		printMap();
+
 		depart: /*Etiquette lorsque l'adversaire commence le jeu*/
 		for(int i=0;i<2;i++){
 			code = getMove(move,replay);
-			// printf("l'adversaire a joué objectif %d\n",move->chooseObjectives);
-			// printf("l'adversaire a joué pioche obj%d\n",move->drawObjectives);
-			// printf("l'adversaire a joué pioche deck%d\n",move->drawBlindCard);
-			// printf("l'adversaire a joué pioche%d\n",move->drawCard);
-			// printf("l'adversaire a joué route%d\n",move->claimRoute);
+
+
+
 
 			if(!replay){
 				i++;
@@ -97,9 +93,8 @@ int main(){
 		}
 	partie->numero_tour+=1;
 	}
-
 	affichage_info_joueur(joueur);
-	//fin_jeu(tracks);
+	closeConnection();
 	free(card);
 	free(move);
 	free(replay);
