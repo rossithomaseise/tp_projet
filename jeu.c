@@ -48,7 +48,7 @@ void affiche_chemin_dest_src(int src, int dest,int Prec[36],s_joueur* joueur){
 		else{
 			joueur->tab_chemin_obj[i] = 100;
 		}
-		printf("ola %d\n",tab_chemin_obj_temp[f-i]);
+		//printf("ola %d\n",tab_chemin_obj_temp[f-i]);
 	}
 }
 
@@ -176,8 +176,8 @@ t_return_code mon_bot(s_partie* partie,s_choixCoup* choixCoup,s_joueur* joueur,i
 			int remplacement;
 
 
-			printf("l'indice est %d\n",indice_src);
-			printf("\n city 1 = %d et city 2 = %d\n",src,dest);	
+			//printf("l'indice est %d\n",indice_src);
+			printf("\ncity 1 = %d et city 2 = %d\n",src,dest);	
 
 			printf("1a longueur du parcours est de %d\n",partie->route_distance[src][joueur->tab_chemin_obj[indice_src]]);
 			/*Indice de la couleur du chemin entre src et la ville d'après*/
@@ -221,23 +221,24 @@ t_return_code mon_bot(s_partie* partie,s_choixCoup* choixCoup,s_joueur* joueur,i
 				int indice;
 				/*Pour sortir de la boucle lorsque les 2 cartes ont déja été piochées*/
 				int end_pioche = 0;
-				for(int i=0;i<4;i++){
-					printf("la carte %d du deck est %d",i,partie->faceUp[i]);
-					// if( (partie->faceUp[i] == joueur->carte_a_pioche[1] || partie->faceUp[i] == 9) && end_pioche == 0){
-					// 	if(compteur == 0){
-					// 		joueur->carte_a_pioche[0] = partie->faceUp[i];
-					// 		compteur++;	
-					// 		indice = i;
-					// 		if(partie->faceUp[i] == 9){
-					// 			end_pioche = 0;
-					// 		}
-					// 	}
-					// 	else if(compteur == 1){
-					// 		joueur->carte_a_pioche[1] = partie->faceUp[i];
-					// 		compteur++;	
-					// 		end_pioche = 1;
-					// 	}
-					// }
+				printf("Deck : ");
+				for(int i=0;i<5;i++){
+					printf(" %d,",partie->faceUp[i]);
+					if( (partie->faceUp[i] == joueur->carte_a_pioche[1] || partie->faceUp[i] == 9) && end_pioche == 0){
+						if(compteur == 0){
+							joueur->carte_a_pioche[0] = partie->faceUp[i];
+							compteur++;	
+							indice = i;
+							if(partie->faceUp[i] == 9){
+								end_pioche = 0;
+							}
+						}
+						else if(compteur == 1){
+							joueur->carte_a_pioche[1] = partie->faceUp[i];
+							compteur++;	
+							end_pioche = 1;
+						}
+					}
 				}
 				if(compteur == 0){
 					choixCoup->identifiant_coup = 2;

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "TicketToRideAPI.h"
 #include "initialisation.h"
-#include "chemin_court.h"
+//#include "chemin_court.h"
 //#include "jeu.h"
 //http://li1417-56.members.linode.com:81/index.html
 //gcc -g -c main.c TicketToRideAPI.c clientAPI.c initialisation.c && gcc -o main main.o TicketToRideAPI.o clientAPI.o initialisation.o  && ./main
@@ -74,8 +74,9 @@ int main(){
 		depart: /*Etiquette lorsque l'adversaire commence le jeu*/
 		for(int i=0;i<2;i++){
 			code = getMove(move,replay);
-
-
+			//FONCTION BOT
+			action_adversaire(move,adversaire,partie);
+			
 
 
 			if(!replay){
@@ -91,7 +92,8 @@ int main(){
 				return code;
 			}
 		}
-	partie->numero_tour+=1;
+		affichage_info_adversaire(adversaire);
+		partie->numero_tour+=1;
 	}
 	affichage_info_joueur(joueur);
 	closeConnection();
